@@ -2,7 +2,7 @@
 <?php 
 session_start(); 
 ob_start();
-$conn = new mysqli("kmke", "xampp", load_db_pass(), "fin_tracking"); // TODO: Update mysqli
+$conn = new mysqli("kmkelm.org", "kmkelmo1", load_db_pass(), "fin_tracking"); // TODO: Update mysqli
 function load_db_pass() { // TODO: Update password location
     fopen("C:\\xampp\\password.txt", "r");
     $pwd_file = fopen("C:\\xampp\\password.txt", "r");
