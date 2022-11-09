@@ -2,7 +2,7 @@
 <?php 
 session_start(); 
 ob_start();
-$conn = new mysqli("localhost", "xampp", load_db_pass(), "fin_tracking"); // TODO: Update mysqli
+$conn = new mysqli("kmke", "xampp", load_db_pass(), "fin_tracking"); // TODO: Update mysqli
 function load_db_pass() { // TODO: Update password location
     fopen("C:\\xampp\\password.txt", "r");
     $pwd_file = fopen("C:\\xampp\\password.txt", "r");
@@ -55,7 +55,7 @@ function is_username_taken($username) {
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Financial Accounting | User Creation</title>
+        <title>Student Project Showcase | User Creation</title>
         <link rel="stylesheet" href="basic.css">
         <script>
             window.addEventListener("load", function() {

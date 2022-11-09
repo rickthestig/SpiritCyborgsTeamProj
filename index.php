@@ -22,7 +22,7 @@ function is_data_valid_login() {
 ?>
 <html lang="en">
     <head>
-        <title>Financial Accounting</title>
+        <title>Student Project Showcase</title>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="basic.css">
         <style>
