@@ -1,0 +1,54 @@
+table.results th, table.results td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+div.navbar {
+    background-color: black;
+    width: 100%;
+    margin-right: -5px;
+}
+div.navbar li {
+    list-style-type:none;
+    padding: 10px;
+    margin-left: -4px;
+    display:inline-block;
+    background-color: black;
+    border-left: solid white;
+}
+div.navbar ul {
+    margin-left: -5px;
+    padding-left: 1px;
+}
+div.navbar a {
+    color:white;
+    text-decoration:none;
+}
+div.navbar li:hover, div.navbar li:hover a {
+    background-color:ivory;
+    color:black;
+}
+div.login {
+    margin: 1% 0%;
+    padding: 5px;
+    background-color: lightgray; 
+    border: 1px solid black;
+    float: right; 
+    position: relative;
+    right: 5%;
+}
+div.mtext {
+    padding: 0px 5px;
+    max-width: 50%;
+    float: left;
+    border-radius: 15px;
+    background-color:wheat;
+}
+body {
+    background-color:gray;
+}
+a:link , a:visited {
+    color:darkmagenta;
+}
+a:hover {
+    color: white;
+}
