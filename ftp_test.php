@@ -10,8 +10,13 @@ $projid = "SELECT ProjID FROM StudentProj WHERE ProjID LIKE sessionProject";
 //i hate php
 $destination_file = "/public_html/$id/$projid/";
 //no clue if this will work, prob wont
-$source_file = $_FILES['file']['tmp_name'];
-
+ // Count total files
+ $countfiles = count($_FILES['file']['tmp_name']);
+ 
+ // Looping all files
+ for($i=0;$i<$countfiles;$i++){
+   $source_file = $_FILES['file']['tmp_name'][$i];
+ }
 // set up basic connection
 $conn_id = ftp_connect($ftp_server,$ftp_port);
 
@@ -30,7 +35,7 @@ if ((!$conn_id) || (!$login_result)) {
 }
 
 // upload the file
-$upload = ftp_put($conn_id, $destination_file, $source_file, FTP_BINARY); 
+$upload = ftp_put($conn_id, $destination_file, $source_file, FTP_BINARY);
 
 // check upload status
 if (!$upload) { 
