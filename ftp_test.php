@@ -11,6 +11,7 @@ $projid = "SELECT ProjID FROM StudentProj WHERE ProjID LIKE sessionProject";
 $destination_file = "/public_html/$id/$projid/";
 //no clue if this will work, prob wont
 if(isset($_POST['submit'])){
+//not sure if this is the right place to put this
  // Count total files
  $countfiles = count($_FILES['file']['tmp_name']);
  
