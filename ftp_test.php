@@ -1,6 +1,11 @@
 <?php
 $ftp_server = "your server or host";
 $ftp_user_name = "username";
+$filename = "/home/kmkelmo1/kmkelm.org/kmkelmoftp/kmk.txt";
+$handle = fopen($filename, "r");
+$contents = fread($handle, filesize($filename));
+fclose($handle);
+echo $ftp_user_pass
 $ftp_user_pass = "password";
 $ftp_port = "port";
 $dir = '/public_html';
