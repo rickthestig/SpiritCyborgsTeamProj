@@ -2,23 +2,24 @@
 <?php 
 session_start(); 
 ob_start();
-$conn = new mysqli("kmkelm.org", "kmkelmo1", load_db_pass(), "fin_tracking"); // TODO: Update mysqli
-function load_db_pass() { // TODO: Update password location
-    fopen("C:\\xampp\\password.txt", "r");
-    $pwd_file = fopen("C:\\xampp\\password.txt", "r");
-    $pass = fread($pwd_file,filesize("C:\\xampp\\password.txt"));
-    fclose($pwd_file);                            
-    return $pass;
+$conn = new mysqli("localhost", "kmkelmo1", load_db_pass(), "kmkelmo1_student_showcase"); // TODO: Update all mysqli
+function load_db_pass() {
+    $filename = "/home/kmkelmo1/kmkelm.org/kmkelmoftp/kmk.txt";
+    $handle = fopen($filename, "r");
+    $contents = fread($handle, filesize($filename));
+    fclose($handle);
+
+    return $contents;
 }
 function is_data_valid() {
     if ($_SERVER["REQUEST_METHOD"] !== "POST") {
         return false; // From is appending data to url
     }            
-    if (empty($_REQUEST["username"]) || empty($_REQUEST["fname"]) || empty($_REQUEST["lname"]) || empty($_REQUEST["email"]) || empty($_REQUEST["pw1"]) || empty($_REQUEST["pw2"])) {
+    if (empty($_REQUEST["userID"]) || empty($_REQUEST["fname"]) || empty($_REQUEST["lname"]) || empty($_REQUEST["currentStud"]) || empty($_REQUEST["pw1"]) || empty($_REQUEST["pw2"])) {
         return false; // Form has empty fields
     }           
-    if (strlen($_REQUEST["username"]) > 25) {
-        return false;   // User name is too long
+    if (strlen($_REQUEST["userID"]) > 11) {
+        return false;   // User ID is too long
     }           
     if (strlen($_REQUEST["pw1"]) < 8) {
         return false;   // Password is too short
@@ -26,23 +27,58 @@ function is_data_valid() {
     if ($_REQUEST["pw1"] !== $_REQUEST["pw2"]) {
         return false;   // Passowrds do not match
     }
-    if (strstr($_REQUEST["email"], "@") === false) {
-        return false; // email field does not contain @ symbol
-    }            
     return true;
 }
-function is_username_taken($username) {
+function is_data_valid_fac() {
+    if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+        return false; // From is appending data to url
+    }            
+    if (empty($_REQUEST["facID"]) || empty($_REQUEST["facfname"]) || empty($_REQUEST["faclname"]) || empty($_REQUEST["currentFac"]) || empty($_REQUEST["facpw1"]) || empty($_REQUEST["facpw2"])) {
+        return false; // Form has empty fields
+    }           
+    if (strlen($_REQUEST["facID"]) > 11) {
+        return false;   // User ID is too long
+    }           
+    if (strlen($_REQUEST["facpw1"]) < 8) {
+        return false;   // Password is too short
+    }            
+    if ($_REQUEST["facpw1"] !== $_REQUEST["facpw2"]) {
+        return false;   // Passowrds do not match
+    }
+    return true;
+}
+function is_userID_taken_student($user) {
     global $conn;
-    if (isset($_REQUEST["username"])) {
-        $stmt = $conn->prepare("SELECT Username FROM users WHERE Username = ?");
-        $stmt->bind_param("s", $username);
+    if (isset($_REQUEST["userID"])) {
+        $stmt = $conn->prepare("SELECT UserID FROM Student WHERE UserID = ?");
+        $stmt->bind_param("i", $user);
         $stmt->execute();
         
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
 
         if ($row) {
-            echo "Username is already taken -- Please choose a different Username & try again";
+            echo "User ID is already taken -- Please try to log in";
+            $stmt->close();
+            return false;
+        } else {
+            $stmt->close();
+            return true;
+        }
+    }
+}
+function is_userID_taken_faculty($facuser) {
+    global $conn;
+    if (isset($_REQUEST["facID"])) {
+        $stmt = $conn->prepare("SELECT InsID FROM Instructor WHERE InsID = ?");
+        $stmt->bind_param("i", $facuser);
+        $stmt->execute();
+        
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row) {
+            echo "User ID is already taken -- Please try to log in";
             $stmt->close();
             return false;
         } else {
@@ -55,7 +91,7 @@ function is_username_taken($username) {
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Student Project Showcase | User Creation</title>
+        <title>Student Showcase | User Creation</title>
         <link rel="stylesheet" href="basic.css">
         <script>
             window.addEventListener("load", function() {
@@ -65,10 +101,10 @@ function is_username_taken($username) {
                     let pw1 = studCreate.pw1.value;
                     let pw2 = studCreate.pw2.value;
                     let errorLog = document.getElementById("errLogStud");
-                    if (studCreate.username.value.length > 100) {
+                    if (studCreate.userID.value.length > 11) {
                         event.preventDefault();
                         errorLog.style.display = "initial";
-                        errorLog.innerHTML = "Username is too long!"
+                        errorLog.innerHTML = "User ID is too long!"
                     } 
                     if (pw1.length < 8) {
                         event.preventDefault();
@@ -79,21 +115,16 @@ function is_username_taken($username) {
                         event.preventDefault();
                         errorLog.style.display = "initial";
                         errorLog.innerHTML = "Passwords do not match!";
-                    }
-                    if (!(studCreate.email.value.search("@"))) {
-                        event.preventDefault();
-                        errorLog.style.display = "initial";
-                        errorLog.innerHTML = "Invalid email address";
                     }
                 });
                 facCreate.addEventListener("submit", function(event) {
-                    let pw1 = facCreate.pw1.value;
-                    let pw2 = facCreate.pw2.value;
+                    let pw1 = facCreate.facpw1.value;
+                    let pw2 = facCreate.facpw2.value;
                     let errorLog = document.getElementbyID("errLogFac");
-                    if (facCreate.username.value.length > 100) {
+                    if (facCreate.userID.value.length > 11) {
                         event.preventDefault();
                         errorLog.style.display = "initial";
-                        errorLog.innerHTML = "Username is too long!"
+                        errorLog.innerHTML = "User ID is too long!"
                     } 
                     if (pw1.length < 8) {
                         event.preventDefault();
@@ -104,11 +135,6 @@ function is_username_taken($username) {
                         event.preventDefault();
                         errorLog.style.display = "initial";
                         errorLog.innerHTML = "Passwords do not match!";
-                    }
-                    if (!(facCreate.email.value.search("@"))) {
-                        event.preventDefault();
-                        errorLog.style.display = "initial";
-                        errorLog.innerHTML = "Invalid email address";
                     }
                 })
             });
@@ -118,9 +144,9 @@ function is_username_taken($username) {
         <ul>
             <li><a href="index.php">Home</a></li>
             <li><a href="userCreate.php">User Creation</a></li>
-            <li><a href="userLogin.php">Log In</a></li>
-            <?php if(isset($_SESSION["username"]) && isset($_SESSION["hash"])) {?>
-            <li><a href="dashboard.php">Dashboard</a></li><?php  }  ?>
+            <!--<li><a href="userLogin.php">Log In</a></li>
+            <?php if(isset($_SESSION["userID"]) && isset($_SESSION["hash"])) {?>
+            <li><a href="dashboard.php">Dashboard</a></li><?php  }  ?>-->
         </ul>
     </div>
     <body>
@@ -135,20 +161,23 @@ function is_username_taken($username) {
                     <tr>
                         <th><label for="fname">First Name:</label></th>
                         <th><label for="lname">Last Name:</label></th>
-                        <th><label for="email">Email:</label></th>
+                        <th><label for="currentStud">Current Student?</label></th>
                     </tr>
                     <tr>
                         <td><input type="text" id="fname" name="fname"></td>
                         <td><input type="text" id="lname" name="lname"></td>
-                        <td><input type="email" id="email" name="email"></td>
+                        <td><select id="currentStud" name="currentStud">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </td>
                     </tr>
                     <tr>
-                        <th><label for="username">Username:</label></th>
+                        <th><label for="userID">UserID:</label></th>
                         <th><label for="pw1">Password:</label></th>
                         <th><label for="pw2">Confirm Password:</label></th>
                     </tr>
                     <tr>
-                        <td><input type="text" id="username" name="username"></td>
+                        <td><input type="number" id="userID" name="userID"></td>
                         <td><input type="password" id="pw1" name="pw1"></td>
                         <td><input type="password" id="pw2" name="pw2"></td>
                     </tr>
@@ -161,27 +190,32 @@ function is_username_taken($username) {
                         if ($conn->connect_error) {
                             die("Connection failed: " . $conn->connect_error);
                         } else if (is_data_valid()) {
-                            if (isset($_SESSION["username"])) {
+                            if (isset($_SESSION["userID"])) {
                                 session_unset();
                             }
-                            $user = htmlspecialchars($_REQUEST["username"]);
+                            $user = htmlspecialchars($_REQUEST["userID"]);
                             $fname = htmlspecialchars($_REQUEST["fname"]);
                             $lname = htmlspecialchars($_REQUEST["lname"]);
-                            $email = htmlspecialchars($_REQUEST["email"]);
+                            $currentStud = htmlspecialchars($_REQUEST["currentStud"]);
+                            if ($currentStud == "Yes") {
+                                $currentStud = 1;
+                            } else if ($currentStud == "No") {
+                                $currentStud = 0;
+                            }
                             $hash = password_hash(htmlspecialchars($_REQUEST["pw1"]), PASSWORD_DEFAULT);
-
-                            if (is_username_taken($user)) {
-                                $stmt = $conn->prepare("INSERT INTO fin_tracking.users (Username, fname, lname, email, PasswordHash) VALUES (?, ?, ?, ?, ?)");
-                                $stmt->bind_param("sssss", $user, $fname, $lname, $email, $hash);
+                            
+                            if (is_userID_taken_student($user)) {
+                                $stmt = $conn->prepare("INSERT INTO Student (UserID, fname, lname, CurrentStudent, HashPW) VALUES (?, ?, ?, ?, ?)");
+                                $stmt->bind_param("issis", $user, $fname, $lname, $currentStud, $hash);
                                 $stmt->execute();
                                 $stmt->close();
 
-                                $_SESSION["username"] = $user;
+                                $_SESSION["userID"] = $user;
                                 $_SESSION["hash"] = $hash;
 
                                 header("Location: "); // TODO: Update header
                             } 
-                        } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
+                        } else if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_REQUEST["userID"])) {
                             echo "Account could not be created";
                         }
                         ?>
@@ -193,24 +227,27 @@ function is_username_taken($username) {
                 <table>
                     <caption>Create Faculty Account</caption>
                     <tr>
-                        <th><label for="fname">First Name:</label></th>
-                        <th><label for="lname">Last Name:</label></th>
-                        <th><label for="email">Email:</label></th>
+                        <th><label for="facfname">First Name:</label></th>
+                        <th><label for="faclname">Last Name:</label></th>
+                        <th><label for="currentFac">Current Faculty?</label></th>
                     </tr>
                     <tr>
-                        <td><input type="text" id="fname" name="fname"></td>
-                        <td><input type="text" id="lname" name="lname"></td>
-                        <td><input type="email" id="email" name="email"></td>
+                        <td><input type="text" id="facfname" name="facfname"></td>
+                        <td><input type="text" id="faclname" name="faclname"></td>
+                        <td><select id="currentFac" name="currentFac">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </td>
                     </tr>
                     <tr>
-                        <th><label for="username">Username:</label></th>
-                        <th><label for="pw1">Password:</label></th>
-                        <th><label for="pw2">Confirm Password:</label></th>
+                        <th><label for="facID">User ID:</label></th>
+                        <th><label for="facpw1">Password:</label></th>
+                        <th><label for="facpw2">Confirm Password:</label></th>
                     </tr>
                     <tr>
-                        <td><input type="text" id="username" name="username"></td>
-                        <td><input type="password" id="pw1" name="pw1"></td>
-                        <td><input type="password" id="pw2" name="pw2"></td>
+                        <td><input type="number" id="facID" name="facID"></td>
+                        <td><input type="password" id="facpw1" name="facpw1"></td>
+                        <td><input type="password" id="facpw2" name="facpw2"></td>
                     </tr>
                     <tr>
                         <td colspan="2"><button form="facCreate" type="submit">Submit</button></td>
@@ -220,28 +257,33 @@ function is_username_taken($username) {
                         <?php
                         if ($conn->connect_error) {
                             die("Connection failed: " . $conn->connect_error);
-                        } else if (is_data_valid()) {
-                            if (isset($_SESSION["username"])) {
+                        } else if (is_data_valid_fac()) {
+                            if (isset($_SESSION["userID"])) {
                                 session_unset();
                             }
-                            $user = htmlspecialchars($_REQUEST["username"]);
-                            $fname = htmlspecialchars($_REQUEST["fname"]);
-                            $lname = htmlspecialchars($_REQUEST["lname"]);
-                            $email = htmlspecialchars($_REQUEST["email"]);
-                            $hash = password_hash(htmlspecialchars($_REQUEST["pw1"]), PASSWORD_DEFAULT);
-
-                            if (is_username_taken($user)) {
-                                $stmt = $conn->prepare("INSERT INTO fin_tracking.users (Username, fname, lname, email, PasswordHash) VALUES (?, ?, ?, ?, ?)");
-                                $stmt->bind_param("sssss", $user, $fname, $lname, $email, $hash);
+                            $facuser = htmlspecialchars($_REQUEST["facID"]);
+                            $facfname = htmlspecialchars($_REQUEST["facfname"]);
+                            $faclname = htmlspecialchars($_REQUEST["faclname"]);
+                            $currentFac = htmlspecialchars($_REQUEST["currentFac"]);
+                            if ($currentFac == "Yes") {
+                                $currentFac = 1;
+                            } else if ($currentFac == "No") {
+                                $currentFac = 0;
+                            }
+                            $fachash = password_hash(htmlspecialchars($_REQUEST["facpw1"]), PASSWORD_DEFAULT);
+                            
+                            if (is_userID_taken_faculty($facuser)) {
+                                $stmt = $conn->prepare("INSERT INTO Instructor (InsID, fname, lname, CurrentFac, HashPW) VALUES (?, ?, ?, ?, ?)");
+                                $stmt->bind_param("issis", $facuser, $facfname, $faclname, $currentFac, $fachash);
                                 $stmt->execute();
                                 $stmt->close();
 
-                                $_SESSION["username"] = $user;
-                                $_SESSION["hash"] = $hash;
+                                $_SESSION["userID"] = $facuser;
+                                $_SESSION["hash"] = $fachash;
 
                                 header("Location: "); // TODO: Update header location
                             } 
-                        } else if ($_SERVER["REQUEST_METHOD"] === "POST") {
+                        } else if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_REQUEST["facID"])) {
                             echo "Account could not be created";
                         }
                         ?>
